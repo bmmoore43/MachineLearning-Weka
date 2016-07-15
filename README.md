@@ -6,10 +6,10 @@ Before starting machine learning, you may want to get random subsets of genes (i
 
 use: get_random_genes2.py
     for multiple class files with random neg sets use: command_files_getrandom.py
-to get your command_files_random-neg-gene.sh file:
+    to get your command_files_random-neg-gene.sh file:
     In the command_files1.py script: the input is your classes file and the type you are comparing (ie. SMvsPM). Designate the number of random draws that you want in the command file.
-submit the shell script: $sh command_files_random-neg-gene.sh
-or use qsub: python qsub_hpc.py -f submit -u john3784 -c command_files_random-neg-gene.sh -w 60 -m 9 -n 230
+    submit the shell script: $sh command_files_random-neg-gene.sh
+    or use qsub: python qsub_hpc.py -f submit -u john3784 -c command_files_random-neg-gene.sh -w 60 -m 9 -n 230
 
 if pos set is bigger than neg set use:
 get_random_genes2-rev.py
@@ -24,7 +24,7 @@ III. Now get arff files using your classes file and features file
     python command_files2.py
     python qsub_hpc.py -f queue -u john3784 -c command_files_randomsubsets_4ARFF.sh -w 120 -m 9 -n 230
 
-Need to get rid of ? in Arff file:
+    Need to get rid of ? in Arff file:
     grep '?,?,?,?,?,?,?,?,?' -v  metabolites-2ndmetabolites-binary_numeric.arff > metabolites-2ndmetabolites-binary_numeric-mod.arff
     use a for loop for multiple arff files:
     for i in *-binary_numeric.arff; do echo $i; grep "?,?,?,?,?,?,?,?,?" -v $i > $i.mod; done
@@ -32,33 +32,34 @@ Need to get rid of ? in Arff file:
     sed s/'{no,yes}'/'{yes,no}'/g metabolites-2ndmetabolites-binary_numeric-mod.arff > test_file_nm
 
 3. Make command file using all arff files with this format:
-desc#classifier1_name 1 2 3 4 5 6 command#weka %s command %s line for classifier 1 desc#classifier2_name 1 2 3 command#weka %s command line for classifier 2
+    desc#classifier1_name 1 2 3 4 5 6 command#weka %s command %s line for classifier 1 desc#classifier2_name 1 2 3 command#weka %s command line for classifier 2
 
-johnny's command file:
-desc#nb_tree
-0.25 0.5 1 2 3 4
-command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.NBTree
-desc#smo
-0.25 0.5 1 2 3 4
-0.01 0.1 0.5 1 1.5 2.0
-command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.functions.SMO -- -C %s -M -L 0.001 -P 1.0E-12 -N 0 -V -1 -W 1 -K "weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0"
-desc#j48
-0.25 0.5 1 2 3 4
-0.05 0.15 0.25 0.35 0.45
-command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.J48 -- -C %s -M 2
-desc#logistic
-0.25 0.5 1 2 3 4
-9 5 1 1E-04 1E-08 1E-10
-command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.functions.Logistic -- -R %s -M -1
-desc#naive_bayes
-0.25 0.5 1 2 3 4
-command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.bayes.NaiveBayes
-desc#ran_for
-0.25 0.5 1 2 3 4
-1 2 3 4 5 7 9
-command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.RandomForest -- -I 100 -K %s -S 1
+example of johnny's command file:
 
-*use simplified metabolite.command
+    desc#nb_tree
+    0.25 0.5 1 2 3 4
+    command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.NBTree
+    desc#smo
+    0.25 0.5 1 2 3 4
+    0.01 0.1 0.5 1 1.5 2.0
+    command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.functions.SMO -- -C %s -M -L 0.001 -P 1.0E-12 -N 0 -V -1 -W 1 -K "weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0"
+    desc#j48
+    0.25 0.5 1 2 3 4
+    0.05 0.15 0.25 0.35 0.45
+    command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.J48 -- -C %s -M 2
+    desc#logistic
+    0.25 0.5 1 2 3 4
+    9 5 1 1E-04 1E-08 1E-10
+    command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.functions.Logistic -- -R %s -M -1
+    desc#naive_bayes
+    0.25 0.5 1 2 3 4
+    command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.bayes.NaiveBayes
+    desc#ran_for
+    0.25 0.5 1 2 3 4
+    1 2 3 4 5 7 9
+    command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.RandomForest -- -I 100 -K %s -S 1
+
+* OR use simplified example: metabolite.command
 
 4. use command file to do a gridsearch with arff file
   python ~lloydjo1/scripts/2_Machine_Learning/2_Grid_Search/grid_search_cc3.py <command file> <ARFF file> <output name prefix> <output dir for machine learning results>
