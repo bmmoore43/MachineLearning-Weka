@@ -20,9 +20,9 @@ III. Now get arff files using your classes file and features file
 1. python ~lloydjo1/scripts/2_Machine_Learning/1_ARFF/2_ARFF_from_matrix.py /mnt/home/john3784/Documents/machine_learning/classes_metabolites.txt 2ndmetabolites metabolites /mnt/home/john3784/Documents/machine_learning/lethal8_binary-w_greencut.matrix,binary /mnt/home/john3784/Documents/machine_learning/lethal8_continuous.matrix.c_norm,numeric
 
 2. Make multiple ARFF files with random subsets of negative genes:
-# use class files to get multiple ARFF files
-python command_files2.py
-python qsub_hpc.py -f queue -u john3784 -c command_files_randomsubsets_4ARFF.sh -w 120 -m 9 -n 230
+    use class files to get multiple ARFF files
+    python command_files2.py
+    python qsub_hpc.py -f queue -u john3784 -c command_files_randomsubsets_4ARFF.sh -w 120 -m 9 -n 230
 
 Need to get rid of ? in Arff file:
     grep '?,?,?,?,?,?,?,?,?' -v  metabolites-2ndmetabolites-binary_numeric.arff > metabolites-2ndmetabolites-binary_numeric-mod.arff
@@ -58,7 +58,7 @@ desc#ran_for
 1 2 3 4 5 7 9
 command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.RandomForest -- -I 100 -K %s -S 1
 
-#use simplified metabolite.command
+*use simplified metabolite.command
 
 4. use command file to do a gridsearch with arff file
   python ~lloydjo1/scripts/2_Machine_Learning/2_Grid_Search/grid_search_cc3.py <command file> <ARFF file> <output name prefix> <output dir for machine learning results>
