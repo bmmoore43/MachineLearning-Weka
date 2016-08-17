@@ -17,8 +17,11 @@ get_random_genes2-rev.py
 II. Next get features for each gene. Divide into numeric or binary or categorical and make a matrix for each.
 
 III. Now get arff files using your classes file and features file
+
 1. python ~lloydjo1/scripts/2_Machine_Learning/1_ARFF/2_ARFF_from_matrix.py /mnt/home/john3784/Documents/machine_learning/classes_metabolites.txt 2ndmetabolites metabolites /mnt/home/john3784/Documents/machine_learning/lethal8_binary-w_greencut.matrix,binary /mnt/home/john3784/Documents/machine_learning/lethal8_continuous.matrix.c_norm,numeric
-ie. 
+
+    ie. python ~lloydjo1/scripts/2_Machine_Learning/1_ARFF/2_ARFF_from_matrix.py SMvsPMvsOther-glucosinolate_genes.ML_classes_file.txt metabolite SMvsPM_nogluc binary_matrix_2.0.mod.txt,binary continuous_matrix_2.0.txt,numeric categor_cluster_matrix.txt,categorical 
+
 2. You may need to remove some unwanted charcters in order for your arff file to run:
     grep '"' -v  metabolites-2ndmetabolites-binary_numeric.arff > metabolites-2ndmetabolites-binary_numeric-mod.arff
     or find and replace:
