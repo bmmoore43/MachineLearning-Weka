@@ -23,9 +23,13 @@ III. Now get arff files using your classes file and features file
     ie. python ~lloydjo1/scripts/2_Machine_Learning/1_ARFF/2_ARFF_from_matrix.py SMvsPMvsOther-glucosinolate_genes.ML_classes_file.txt metabolite SMvsPM_nogluc binary_matrix_2.0.mod.txt,binary continuous_matrix_2.0.txt,numeric categor_cluster_matrix.txt,categorical 
 
 2. You may need to remove some unwanted charcters in order for your arff file to run:
-    grep '"' -v  metabolites-2ndmetabolites-binary_numeric.arff > metabolites-2ndmetabolites-binary_numeric-mod.arff
+
+    grep '"' -v  metabolites-2ndmetabolites-binary_numeric.arff > metabolites-2ndmetabolites-binary_numeric-mod.arff #removes lines with character
+    
     or find and replace:
     sed -e 's/"//g' binary_matrix_2.0.txt > binary_matrix_2.0.mod.txt
+    sed -e 's/NA/?/g' SMvsOther_feat_select-metabolite-binary.arff > SMvsOther_feat_select-metabolite-binary.mod.arff
+    
     for special charcters:
     sed -i -e 's/\[//g;s/\]//g' file -> removes [ and ] (edits file in place)
 
@@ -34,57 +38,77 @@ III. Now get arff files using your classes file and features file
 
     i. example of johnny's command file:
 
-    desc#nb_tree
-    0.25 0.5 1 2 3 4
-    command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.NBTree
-    desc#smo
-    0.25 0.5 1 2 3 4
-    0.01 0.1 0.5 1 1.5 2.0
-    command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.functions.SMO -- -C %s -M -L 0.001 -P 1.0E-12 -N 0 -V -1 -W 1 -K "weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0"
-    desc#j48
-    0.25 0.5 1 2 3 4
-    0.05 0.15 0.25 0.35 0.45
-    command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.J48 -- -C %s -M 2
-    desc#logistic
-    0.25 0.5 1 2 3 4
-    9 5 1 1E-04 1E-08 1E-10
-    command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.functions.Logistic -- -R %s -M -1
-    desc#naive_bayes
-    0.25 0.5 1 2 3 4
-    command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.bayes.NaiveBayes
-    desc#ran_for
-    0.25 0.5 1 2 3 4
-    1 2 3 4 5 7 9
-    command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.RandomForest -- -I 100 -K %s -S 1
+        desc#nb_tree
+        0.25 0.5 1 2 3 4
+        command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.NBTree
+    
+        desc#smo
+        0.25 0.5 1 2 3 4
+        0.01 0.1 0.5 1 1.5 2.0
+        command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.functions.SMO -- -C %s -M -L 0.001 -P 1.0E-12 -N 0 -V -1 -W 1 -K "weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0"
+    
+        desc#j48
+        0.25 0.5 1 2 3 4
+        0.05 0.15 0.25 0.35 0.45
+        command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.J48 -- -C %s -M 2
+    
+        desc#logistic
+        0.25 0.5 1 2 3 4
+        9 5 1 1E-04 1E-08 1E-10
+        command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.functions.Logistic -- -R %s -M -1
+    
+        desc#naive_bayes
+        0.25 0.5 1 2 3 4
+        command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.bayes.NaiveBayes
+    
+        desc#ran_for
+        0.25 0.5 1 2 3 4
+        1 2 3 4 5 7 9
+        command#java weka.classifiers.meta.FilteredClassifier -t ARFF -c last -p 0 -distribution -F "weka.filters.supervised.instance.SpreadSubsample -M %s" -W weka.classifiers.trees.RandomForest -- -I 100 -K %s -S 1
 
     ii. OR use simplified example: metabolite.command:
         
-    desc#smo
-    0.01 0.1 0.5 1 1.5 2.0
-    command#java weka.classifiers.functions.SMO -t ARFF -c last -p 0 -distribution -C %s -M -L 0.001 -P 1.0E-12 -N 0 -V -1 -W 1 -K "weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0"
-    desc#ran_for
-    1 2 3 4 5 7 9
-    command#java weka.classifiers.trees.RandomForest -t ARFF -c last -p 0 -distribution -I 100 -K %s -S 1
+        desc#smo
+        0.01 0.1 0.5 1 1.5 2.0
+        command#java weka.classifiers.functions.SMO -t ARFF -c last -p 0 -distribution -C %s -M -L 0.001 -P 1.0E-12 -N 0 -V -1 -W 1 -K "weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0"
+    
+        desc#ran_for
+        1 2 3 4 5 7 9
+        command#java weka.classifiers.trees.RandomForest -t ARFF -c last -p 0 -distribution -I 100 -K %s -S 1
     
     iii. if many arff files, can run a couple using all parameters, choose the best parameters for these, then run all just on the best parameters
 
 4. Balance ARFF files and generate parameter grid search commands: will create 100 random subsets of neg files, then create a all_bal_grid_searches.runcc to submit to the queue
-        python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_1-grid_search_runcc-balanced_arffs.py
+        
+python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_1-grid_search_runcc-balanced_arffs.py
 
         python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_1-grid_search_runcc-balanced_arffs.py -arff /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/metabolite-SMvsPM_nogluc-binary_numeric_categorical-mod.arff -main_dir /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/ -cmd /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/metabolite.command 
 
 5. submit runcc files
     python ~shius/codes/qsub_hpc.py -f submit -c <runcc file> -w <walltime in min> -m <memory in gigs> -J <job name>
-    python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c all_bal_grid_searches.runcc -w 239 -m 12 -n 230
-    if you have multiple runcc files: make master file in unix
-    cat results*/metabolites*2nd.runcc > metabolite_all.runcc
-    then qsub master file
-    python qsub_hpc.py -f submit -u john3784 -c metabolite_all.runcc -w 240 -m 12 -n 230
+    
+        python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c all_bal_grid_searches.runcc -w 239 -m 12 -n 230
+    
+if you have multiple runcc files: make master file in unix
+    
+        cat results*/metabolites*2nd.runcc > metabolite_all.runcc
+    
+then qsub master file
+    
+        python qsub_hpc.py -f submit -u john3784 -c metabolite_all.runcc -w 240 -m 12 -n 230
 
-6. parse prediction files - Use pred files to get cross-validation file
+6. if not all jobs finished, run grid search again, then concatenate the bal_grid_search.failed.runcc files to resubmit as one file. Run with a longer walltime
+
+        cat *arff_grid_search/bal_grid_search.failed.runcc > all_bal_grid_searches.failed.runcc
+        
+        python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c all_bal_grid_searches.failed.runcc -w 600 -m 12 -n 230
+
+7. parse prediction files - Use pred files to get cross-validation file
   each column represents a pair: actual class, predicted class for the test data set (how well does your model work on test data?)
-  python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/1_cv_sort-batch.py <dir with .pred files> <pos class name> <neg class name> <cross-validation folds in run
-  python 1_cv_sort-batch.py /mnt/home/john3784/Documents/machine_learning/ yes no 10
+    
+    python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/1_cv_sort-batch.py <dir with .pred files> <pos class name> <neg class name> <cross-validation folds in run>
+  
+    python 1_cv_sort-batch.py /mnt/home/john3784/Documents/machine_learning/ yes no 10
 
   For multiple files within multiple folders labeled 'results':
   python 1_cv_sort-batch2.py /mnt/home/john3784/Documents/machine_learning yes no 10
