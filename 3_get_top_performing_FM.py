@@ -46,7 +46,7 @@ def get_top_performing(dict,out):
 		out.write(out_str + "\n")
 
 for dir in os.listdir(start_dir):
-    if dir.startswith("results"):
+    if dir.endswith(".arff_grid_search"):
         file_dir = str(start_dir) + str(dir) + '/'
         #print file_dir
         dict = {}
