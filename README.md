@@ -103,44 +103,68 @@ then qsub master file
         
         python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c all_bal_grid_searches.failed.runcc -w 600 -m 12 -n 230
 
-7. parse prediction files - Use pred files to get cross-validation file
-  each column represents a pair: actual class, predicted class for the test data set (how well does your model work on test data?)
+7. Assess grid search performances:
+
+    When the grid search through parameters from step 1 has completed, use this script to calculate the performances (aucroc) of each classifier/parameter set combination
     
-    python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/1_cv_sort-batch.py <dir with .pred files> <pos class name> <neg class name> <cross-validation folds in run>
-  
-    python 1_cv_sort-batch.py /mnt/home/john3784/Documents/machine_learning/ yes no 10
+        /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_2-performance-balanced_arffs.py
+        
+        required args:
+            -main_dir = directory with [arff]_grid_search subdirectories
+            -cmd = machine learning command file used in previous step
 
-  For multiple files within multiple folders labeled 'results':
-  python 1_cv_sort-batch2.py /mnt/home/john3784/Documents/machine_learning yes no 10
+        default args:
+            -cv = No. of CV folds, default = 10
+            -pos = Name of positive class, default = yes
+            -neg = Name of positive class, default = no
 
-7. get AUC-ROC from sorted-cv files
-  R --vanilla --slave --args <dir with .sorted_cv files> <output name> < ~lloydjo1/scripts/2_Machine_Learning/3_Performance/2_aucroc_calc-batch.R
-  R --vanilla --slave --args /mnt/home/john3784/Documents/machine_learning/ metabolite-aucroc < ~lloydjo1/scripts/2_Machine_Learning/3_Performance/2_aucroc_calc-batch.R
+        optional args:
+             -manual_cv
+            -models
 
-  for multiple directories use a command file:
-  python command_files4.py
-  python qsub_hpc.py -f submit -u john3784 -c command_files_qsub_auc-roc.sh -w 40 -m 4 -n 230
+This script will calculate the median AUC-ROC across the 100 (default) balanced
+Weka runs for each parameter set.
+  outputs:
+  main_dir/all_aucroc - aucroc values for all classifier/parameter sets for 
+			each balanced run
+  main_dir/all_aucroc.all_med - median aucroc for each classifier/parameter set
+  main_dir/all_aucroc.top_med - median aucroc of best parameter set for each 
+				classifier
 
-8. get the best performing run for each classifier
-  python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/3_get_top_performing.py <auc-roc file>
-  python 3_get_top_performing.py metabolite-aucroc
-  for multiple directories that have auc-roc files:
-  python 3_get_top_performing2.py /mnt/home/john3784/Documents/machine_learning/
+Optional arguments:
+  -manual_cv  Manually cross-validation split the balanced ARFF files and
+	      generate a runcc file for making models of the training data
+	      using the best parameter sets for each classifer.
+	manual cv runcc file output: main_dir/all_cv.runcc
 
-9. visualize auc-roc
-  R --vanilla --slave --args <top aucroc file> <dir with .sorted_cv files> <classifier labels> <SE in legend? y/n> <space around chart? y/n> < ~lloydjo1/scripts/2_Machine_Learning/3_Performance/4_aucroc_and_pr_curves.R
-  R --vanilla --slave --args metabolite-aucroc2.top ~john3784/Documents/machine_learning/ RF,SVM,log,NBtree,NB,J48 y y < ~lloydjo1/scripts/2_Machine_Learning/3_Performance/4_aucroc_and_pr_curves.R
+  -models  Output a runcc command file to generate model for each balanced
+	   dataset using the best-performing parameter set for each classifier.
+	models runcc file output: main_dir/best_models.runcc
+
+flag: -manual_cv
+
+This optional flag will manually cross-validate the balanced ARFF files output a runcc file to generate models from training sets. This is useful to get a score that is associated with each instance in your dataset. Follow steps 3 and 4 below to continue this leg of the pipeline.
+This option will output a runcc file containing commands to generate models for the training ARFF files sets that were also created in this step. This file is called all_cv.runcc and will be located in the directory provided by -main_dir.
+
+flag: -models
+
+This optional flag will output a runcc file to generate the models for the best-performing parameter set for each classifier. This is useful if you wish to apply the learning to a group of unknown instances. Follow steps 3b and 4b below to continue this leg of the pipeline.
+This option will output a runcc file containing commands to generate models from teh best-performing parameter sets. This file is called best_models.runcc and will be located in the directory provided by -main_dir.
+
+
 
 10. get F measure						
   python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/performance_at_thresholds-pred.py <pred file> <pos class name> <neg class name>
-  python performance_at_thresholds-pred2.py metabolites-2ndmetabolites-binary_numeric-mod2.arff--ran_for_oup7.pred yes no
+  
+        python /mnt/home/john3784/Github/MachineLearning-Weka/performance_at_thresholds-pred2.py SMvsOther-metabolite-binary_numeric_categorical.mod.balanced49.arff_grid_search/SMvsOther-metabolite-binary_numeric_categorical.mod.balanced49.arff--ran_for--par1.pred  yes no
 
   for multiple files
   use python command_files5.py
   qsub command_files_fmeasure.sh
 
   OR use a unix loop: 
-  for i in results*/*.pred; do echo $i; python ~john3784/machine_learning/performance_at_thresholds-pred2.py $i yes no; done
+  
+        for i in *arff_grid_search/*.pred; do echo $i; python /mnt/home/john3784/Github/MachineLearning-Weka/performance_at_thresholds-pred2.py $i yes no; done
 
 11. top performing f measure
   3-get_top_performing_FM.py <dir with results folders with .thresh_perf files>
@@ -219,3 +243,31 @@ then qsub master file
 5. for multiple arff files:
   python command_files3.py
   python qsub_hpc.py -f submit -u john3784 -c command_files_gridsearch_ARFF.sh -w 120 -m 9 -n 230
+
+6. parse prediction files - Use pred files to get cross-validation file
+  each column represents a pair: actual class, predicted class for the test data set (how well does your model work on test data?)
+    
+    python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/1_cv_sort-batch.py <dir with .pred files> <pos class name> <neg class name> <cross-validation folds in run>
+  
+    python 1_cv_sort-batch.py /mnt/home/john3784/Documents/machine_learning/ yes no 10
+
+  For multiple files within multiple folders labeled 'results':
+  python 1_cv_sort-batch2.py /mnt/home/john3784/Documents/machine_learning yes no 10
+  
+7. get AUC-ROC from sorted-cv files
+  R --vanilla --slave --args <dir with .sorted_cv files> <output name> < ~lloydjo1/scripts/2_Machine_Learning/3_Performance/2_aucroc_calc-batch.R
+  R --vanilla --slave --args /mnt/home/john3784/Documents/machine_learning/ metabolite-aucroc < ~lloydjo1/scripts/2_Machine_Learning/3_Performance/2_aucroc_calc-batch.R
+
+  for multiple directories use a command file:
+  python command_files4.py
+  python qsub_hpc.py -f submit -u john3784 -c command_files_qsub_auc-roc.sh -w 40 -m 4 -n 230
+
+8. get the best performing run for each classifier
+  python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/3_get_top_performing.py <auc-roc file>
+  python 3_get_top_performing.py metabolite-aucroc
+  for multiple directories that have auc-roc files:
+  python 3_get_top_performing2.py /mnt/home/john3784/Documents/machine_learning/
+
+9. visualize auc-roc
+  R --vanilla --slave --args <top aucroc file> <dir with .sorted_cv files> <classifier labels> <SE in legend? y/n> <space around chart? y/n> < ~lloydjo1/scripts/2_Machine_Learning/3_Performance/4_aucroc_and_pr_curves.R
+  R --vanilla --slave --args metabolite-aucroc2.top ~john3784/Documents/machine_learning/ RF,SVM,log,NBtree,NB,J48 y y < ~lloydjo1/scripts/2_Machine_Learning/3_Performance/4_aucroc_and_pr_curves.R
