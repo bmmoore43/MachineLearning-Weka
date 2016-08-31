@@ -165,8 +165,8 @@ This option will output a runcc file containing commands to generate models from
         for i in *arff_grid_search/*.pred; do echo $i; python /mnt/home/john3784/Github/MachineLearning-Weka/performance_at_thresholds-pred2.py $i yes no; done
 
 9. top performing f measure
-  3-get_top_performing_FM.py <dir with results folders with .thresh_perf files>
-  python 3_get_top_performing_FM.py /mnt/home/john3784/machine_learning/arff_files/SMvsOther/
+  3-get_top_performing_FM_final.py <dir with results folders with .thresh_perf files>
+  	python ~john3784/Github/MachineLearning-Weka/3_get_top_performing_FM_final.py /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/SMvsOther_arff_files/
 
 10. Get SVM weights for each feature
   python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/get_full_output-top_file.py <.top file> <.runcc file>
