@@ -151,9 +151,7 @@ flag: -models
 This optional flag will output a runcc file to generate the models for the best-performing parameter set for each classifier. This is useful if you wish to apply the learning to a group of unknown instances. Follow steps 3b and 4b below to continue this leg of the pipeline.
 This option will output a runcc file containing commands to generate models from teh best-performing parameter sets. This file is called best_models.runcc and will be located in the directory provided by -main_dir.
 
-
-
-10. get F measure						
+8. get F measure						
   python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/performance_at_thresholds-pred.py <pred file> <pos class name> <neg class name>
   
         python /mnt/home/john3784/Github/MachineLearning-Weka/performance_at_thresholds-pred2.py SMvsOther-metabolite-binary_numeric_categorical.mod.balanced49.arff_grid_search/SMvsOther-metabolite-binary_numeric_categorical.mod.balanced49.arff--ran_for--par1.pred  yes no
@@ -166,11 +164,12 @@ This option will output a runcc file containing commands to generate models from
   
         for i in *arff_grid_search/*.pred; do echo $i; python /mnt/home/john3784/Github/MachineLearning-Weka/performance_at_thresholds-pred2.py $i yes no; done
 
-11. top performing f measure
-  3-get_top_performing_FM.py <dir with results folders with .thresh_perf files>
-  python 3_get_top_performing_FM.py /mnt/home/john3784/machine_learning/arff_files/SMvsOther/
+9. top performing f measure
+  3-get_top_performing_FM_final.py <dir with results folders with .thresh_perf files>
+  	
+	python ~john3784/Github/MachineLearning-Weka/3_get_top_performing_FM_final.py /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/SMvsOther_arff_files/
 
-12. Get SVM weights for each feature
+10. Get SVM weights for each feature
   python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/get_full_output-top_file.py <.top file> <.runcc file>
   python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/get_full_output-top_file.py metabolite-aucroc2.top metabolite_all4.runcc
   less metabolites-2ndmetabolites-binary_numeric-mod2.arff--smo_oup6.full_output
@@ -214,7 +213,47 @@ This option will output a runcc file containing commands to generate models from
 13. Visualize features via Barplot:
   use barplot_features.R with an input of a list of features and their weights (pos or neg)
 
-14. Support Vector Machine background and feature selection:
+#applying models to unknown data:
+
+1. first you need the best_models.runcc file generated in step 7 (assessing grid search performance)
+	
+	qsub this file:
+		python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c best_models.runcc -w 239 -m 12 -n 230
+
+2. use the following script to generate another runcc file to apply best-performing models to an unlabled ARFF file:
+	
+	/mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_3b-apply_models_to_unlabeled-balanced_arff.py
+	
+	arguments:
+	inp1 = directory with arff_grid_search subdirectories (-main_dir in previous steps)
+	inp2 = unlabelled ARFF file
+	inp3 = output directory
+
+	This script will output a runcc files containing commands to apply best-performing models to an ARFF file with unlabeled instances. This file will be called apply_models-unlabeled.runcc and will be located in the directory provided in the first input argument.
+
+		python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_3b-apply_models_to_unlabeled-balanced_arff.py /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/SMvsPM_nogluc_arff_files/ SMvsPM_nogluc-metabolite-binary_numeric_categorical.mod.unlabeled.arff /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/SMvsPM_nogluc_arff_files/results/
+
+3. qsub the apply_models-unlabeled.runcc
+
+		python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c apply_models-unlabeled.runcc -w 239 -m 12 -n 230
+
+4. Associate scores with instance identifiers - unlabeled instances
+
+	Once models have completed being applied to test sets, this script will assocaited teh machine learning scores with instance identifiers:
+	
+	/mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_4-associate_gene_ids-balanced_arffs.py 
+	
+	arguments:
+	inp1 = directory with model_applied.arff prediction files
+	inp2 = file with instance IDs from the unlabeled ARFF file
+
+	This script will associate yes probability scores with gene IDs for each
+	balanced model. It will also combine all scores across files for each ML classifer into one output file.
+
+  	output score files: input_dir/model--[classifier]--[parameters].scores
+
+#A note on Support Vector Machines and feature selection:
+
   For a general kernel it is difficult to interpret the SVM weights, however for the linear SVM there actually is a useful interpretation:
   1) Recall that in linear SVM, the result is a hyperplane that separates the classes as best as possible. The weights represent this hyperplane, by giving you the coordinates of a vector which is orthogonal to the hyperplane - these are the coefficients given by svm.coef_. Let's call this vector w.
   2) What can we do with this vector? It's direction gives us the predicted class, so if you take the dot product of any point with the vector, you can tell on which side it is: if the dot product is positive, it belongs to the positive class, if it is negative it belongs to the negative class.
