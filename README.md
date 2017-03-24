@@ -96,6 +96,10 @@ if you have multiple runcc files: make master file in unix
 then qsub master file
     
         python qsub_hpc.py -f submit -u john3784 -c metabolite_all.runcc -w 240 -m 12 -n 230
+	
+submit via Johnny's qsub for grouped submissions (typically 20-50 at a time)
+
+	 python /mnt/home/lloydjo1/scripts/qsub_hpc-JL.py -f submit -c metabolite_all.runcc -u john3784 -n 230 -w 239 -m 12 -nc 20
 
 6. if not all jobs finished, run grid search again, then concatenate the bal_grid_search.failed.runcc files to resubmit as one file. Run with a longer walltime
 
@@ -215,25 +219,34 @@ This option will output a runcc file containing commands to generate models from
 
 #applying models to unknown data:
 
-1. first you need the best_models.runcc file generated in step 7 (assessing grid search performance)
+1. first get run the manually cross validated files (all_cv.runcc) to get scores for your training set:
+
+		python /mnt/home/lloydjo1/scripts/qsub_hpc-JL.py -f submit -c all_cv.runcc -u john3784 -n 230 -w 239 -m 12 -nc 20
+
+	Calculate the fmeasure for each run, and find the highest fmeasure.
+	Use the score associated with this f-measure as your cutoff for classifying
+
+2. Next you need the best_models.runcc file generated in step 7 (assessing grid search performance)
 	
 	qsub this file:
-		python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c best_models.runcc -w 239 -m 12 -n 230
-
-2. use the following script to generate another runcc file to apply best-performing models to an unlabled ARFF file:
 	
-	/mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_3b-apply_models_to_unlabeled-balanced_arff.py
-	
-	arguments:
-	inp1 = directory with arff_grid_search subdirectories (-main_dir in previous steps)
-	inp2 = unlabelled ARFF file
-	inp3 = output directory
+		python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c best_models.runcc -w 239 -m 12 		   -n 230
 
-	This script will output a runcc files containing commands to apply best-performing models to an ARFF file with unlabeled instances. This file will be called apply_models-unlabeled.runcc and will be located in the directory provided in the first input argument.
+3. use the following script to generate another runcc file to apply best-performing models to an unlabled ARFF file:
+	
+		/mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_3b-apply_models_to_unlabeled-balanced_arff.py
+	
+		arguments:
+	
+		inp1 = directory with arff_grid_search subdirectories (-main_dir in previous steps)
+		inp2 = unlabelled ARFF file
+		inp3 = output directory
+
+This script will output a runcc files containing commands to apply best-performing models to an ARFF file with unlabeled instances. This file will be called apply_models-unlabeled.runcc and will be located in the directory provided in the first input argument.
 
 		python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_3b-apply_models_to_unlabeled-balanced_arff.py /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/SMvsPM_nogluc_arff_files/ SMvsPM_nogluc-metabolite-binary_numeric_categorical.mod.unlabeled.arff /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/SMvsPM_nogluc_arff_files/results/
 
-3. qsub the apply_models-unlabeled.runcc
+4. qsub the apply_models-unlabeled.runcc
 
 		python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c apply_models-unlabeled.runcc -w 239 -m 12 -n 230
 
