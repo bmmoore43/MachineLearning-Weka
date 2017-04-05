@@ -83,6 +83,10 @@ III. Now get arff files using your classes file and features file
 python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_1-grid_search_runcc-balanced_arffs.py
 
         python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_1-grid_search_runcc-balanced_arffs.py -arff /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/metabolite-SMvsPM_nogluc-binary_numeric_categorical-mod.arff -main_dir /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/ -cmd /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/metabolite.command 
+	
+To loop through multiple arff files run:
+	
+	python ~john3784/Github/MachineLearning-Weka/command_files_multiarff_gridsearch.py <dir with arff files, including separate output directories labeled as name_results>
 
 5. submit runcc files
     python ~shius/codes/qsub_hpc.py -f submit -c <runcc file> -w <walltime in min> -m <memory in gigs> -J <job name>
