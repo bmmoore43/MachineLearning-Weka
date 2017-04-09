@@ -1,40 +1,51 @@
 # MachineLearning-Weka
 machine learning and grid search programs
 
-I. The first thing is to make a classes file. gene, yes (to designated feature) and then gene, no.
+1. The first thing is to make a classes file. gene, yes (to designated feature) and then gene, no.
 Before starting machine learning, you may want to get random subsets of genes (if your negative gene set is way larger than your positive or vice versa)
 
-use: get_random_genes2.py
-    for multiple class files with random neg sets use: command_files_getrandom.py
-    to get your command_files_random-neg-gene.sh file:
-    In the command_files1.py script: the input is your classes file and the type you are comparing (ie. SMvsPM). Designate the number of random draws that you want in the command file.
-    submit the shell script: $sh command_files_random-neg-gene.sh
-    or use qsub: python qsub_hpc.py -f submit -u john3784 -c command_files_random-neg-gene.sh -w 60 -m 9 -n 230
+	get_random_genes2.py
+	
+for multiple class files with random neg sets use: 
+
+	command_files_getrandom.py
+	
+to get your command_files_random-neg-gene.sh file:
+
+    	python command_files1.py <classes file> <type (ie. SMvsPM)> 
+	Designate the number of random draws that you want in the command file.
+	
+submit the shell script or use qsub: 
+
+	$sh command_files_random-neg-gene.sh
+    	python qsub_hpc.py -f submit -u john3784 -c command_files_random-neg-gene.sh -w 60 -m 9 -n 230
 
 if pos set is bigger than neg set use:
-get_random_genes2-rev.py
+	
+	get_random_genes2-rev.py
 
-II. Next get features for each gene. Divide into numeric or binary or categorical and make a matrix for each.
+2. Next get features for each gene. Divide into numeric or binary or categorical and make a matrix for each.
 
-III. Now get arff files using your classes file and features file
+3. Now get arff files using your classes file and features file
 
-1. python ~lloydjo1/scripts/2_Machine_Learning/1_ARFF/2_ARFF_from_matrix.py /mnt/home/john3784/Documents/machine_learning/classes_metabolites.txt 2ndmetabolites metabolites /mnt/home/john3784/Documents/machine_learning/lethal8_binary-w_greencut.matrix,binary /mnt/home/john3784/Documents/machine_learning/lethal8_continuous.matrix.c_norm,numeric
+		python ~lloydjo1/scripts/2_Machine_Learning/1_ARFF/2_ARFF_from_matrix.py SMvsPMvsOther-	glucosinolate_genes.ML_classes_file.txt metabolite SMvsPM_nogluc binary_matrix_2.0.mod.txt,binary continuous_matrix_2.0.txt,numeric categor_cluster_matrix.txt,categorical 
 
-    ie. python ~lloydjo1/scripts/2_Machine_Learning/1_ARFF/2_ARFF_from_matrix.py SMvsPMvsOther-glucosinolate_genes.ML_classes_file.txt metabolite SMvsPM_nogluc binary_matrix_2.0.mod.txt,binary continuous_matrix_2.0.txt,numeric categor_cluster_matrix.txt,categorical 
+4. You may need to remove some unwanted charcters in order for your arff file to run:
 
-2. You may need to remove some unwanted charcters in order for your arff file to run:
-
-    grep '"' -v  metabolites-2ndmetabolites-binary_numeric.arff > metabolites-2ndmetabolites-binary_numeric-mod.arff #removes lines with character
+    	grep '"' -v  metabolites-2ndmetabolites-binary_numeric.arff > metabolites-2ndmetabolites-binary_numeric-mod.arff #removes lines with character
     
     or find and replace:
-    sed -e 's/"//g' binary_matrix_2.0.txt > binary_matrix_2.0.mod.txt
-    sed -e 's/NA/?/g' SMvsOther_feat_select-metabolite-binary.arff > SMvsOther_feat_select-metabolite-binary.mod.arff
+    
+    	sed -e 's/"//g' binary_matrix_2.0.txt > binary_matrix_2.0.mod.txt
+    	sed -e 's/NA/?/g' SMvsOther_feat_select-metabolite-binary.arff > SMvsOther_feat_select-metabolite-binary.mod.arff
     
     for special charcters:
-    sed -i -e 's/\[//g;s/\]//g' file -> removes [ and ] (edits file in place)
+    
+    	sed -i -e 's/\[//g;s/\]//g' file -> removes [ and ] (edits file in place)
 
-3. Make command file using all arff files with this format:
-    desc#classifier1_name 1 2 3 4 5 6 command#weka %s command %s line for classifier 1 desc#classifier2_name 1 2 3 command#weka %s command line for classifier 2
+5. Make command file for use in all arff files with this format:
+    
+    	desc#classifier1_name 1 2 3 4 5 6 command#weka %s command %s line for classifier 1 desc#classifier2_name 1 2 3 command#weka %s command line for classifier 2
 
     i. example of johnny's command file:
 
@@ -80,7 +91,7 @@ III. Now get arff files using your classes file and features file
 
 4. Balance ARFF files and generate parameter grid search commands: will create 100 random subsets of neg files, then create a all_bal_grid_searches.runcc to submit to the queue
         
-python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_1-grid_search_runcc-balanced_arffs.py
+	python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_1-grid_search_runcc-balanced_arffs.py
 
         python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_1-grid_search_runcc-balanced_arffs.py -arff /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/metabolite-SMvsPM_nogluc-binary_numeric_categorical-mod.arff -main_dir /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/ -cmd /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/metabolite.command 
 	
@@ -88,24 +99,17 @@ To loop through multiple arff files run:
 	
 	python ~john3784/Github/MachineLearning-Weka/command_files_multiarff_gridsearch.py <dir with arff files, including separate output directories labeled as name_results>
 
-5. submit runcc files
+submit runcc files
+
     python ~shius/codes/qsub_hpc.py -f submit -c <runcc file> -w <walltime in min> -m <memory in gigs> -J <job name>
     
-        python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c all_bal_grid_searches.runcc -w 239 -m 12 -n 230
-    
-if you have multiple runcc files: make master file in unix
-    
-        cat results*/metabolites*2nd.runcc > metabolite_all.runcc
-    
-then qsub master file
-    
-        python qsub_hpc.py -f submit -u john3784 -c metabolite_all.runcc -w 240 -m 12 -n 230
+    python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c all_bal_grid_searches.runcc -w 239 -m 12 -n 230
 	
 submit via Johnny's qsub for grouped submissions (typically 20-50 at a time)
 
 	 python /mnt/home/lloydjo1/scripts/qsub_hpc-JL.py -f submit -c metabolite_all.runcc -u john3784 -n 230 -w 239 -m 12 -nc 20
 
-6. if not all jobs finished, run grid search again, then concatenate the bal_grid_search.failed.runcc files to resubmit as one file. Run with a longer walltime
+if not all jobs finished, run grid search again, then concatenate the bal_grid_search.failed.runcc files to resubmit as one file. Run with a longer walltime
 
         cat *arff_grid_search/bal_grid_search.failed.runcc > all_bal_grid_searches.failed.runcc
         
@@ -132,60 +136,64 @@ submit via Johnny's qsub for grouped submissions (typically 20-50 at a time)
 
 This script will calculate the median AUC-ROC across the 100 (default) balanced
 Weka runs for each parameter set.
-  outputs:
-  main_dir/all_aucroc - aucroc values for all classifier/parameter sets for 
+  
+  	outputs:
+  	main_dir/all_aucroc - aucroc values for all classifier/parameter sets for 
 			each balanced run
-  main_dir/all_aucroc.all_med - median aucroc for each classifier/parameter set
-  main_dir/all_aucroc.top_med - median aucroc of best parameter set for each 
+ 	 main_dir/all_aucroc.all_med - median aucroc for each classifier/parameter set
+ 	 main_dir/all_aucroc.top_med - median aucroc of best parameter set for each 
 				classifier
 
 Optional arguments:
-  -manual_cv  Manually cross-validation split the balanced ARFF files and
-	      generate a runcc file for making models of the training data
-	      using the best parameter sets for each classifer.
-	manual cv runcc file output: main_dir/all_cv.runcc
 
-  -models  Output a runcc command file to generate model for each balanced
-	   dataset using the best-performing parameter set for each classifier.
-	models runcc file output: main_dir/best_models.runcc
-
-flag: -manual_cv
+	flag: -manual_cv
 
 This optional flag will manually cross-validate the balanced ARFF files output a runcc file to generate models from training sets. This is useful to get a score that is associated with each instance in your dataset. Follow steps 3 and 4 below to continue this leg of the pipeline.
 This option will output a runcc file containing commands to generate models for the training ARFF files sets that were also created in this step. This file is called all_cv.runcc and will be located in the directory provided by -main_dir.
 
-flag: -models
+	flag: -models
 
 This optional flag will output a runcc file to generate the models for the best-performing parameter set for each classifier. This is useful if you wish to apply the learning to a group of unknown instances. Follow steps 3b and 4b below to continue this leg of the pipeline.
 This option will output a runcc file containing commands to generate models from teh best-performing parameter sets. This file is called best_models.runcc and will be located in the directory provided by -main_dir.
 
-8. get F measure						
-  python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/performance_at_thresholds-pred.py <pred file> <pos class name> <neg class name>
-  
-        python /mnt/home/john3784/Github/MachineLearning-Weka/performance_at_thresholds-pred2.py SMvsOther-metabolite-binary_numeric_categorical.mod.balanced49.arff_grid_search/SMvsOther-metabolite-binary_numeric_categorical.mod.balanced49.arff--ran_for--par1.pred  yes no
+8. get F measure
 
-  for multiple files
-  use python command_files5.py
-  qsub command_files_fmeasure.sh
+  		python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/performance_at_thresholds-pred.py <pred file> <pos class name> <neg class name>
+  
+       		python /mnt/home/john3784/Github/MachineLearning-Weka/performance_at_thresholds-pred2.py SMvsOther-metabolite-binary_numeric_categorical.mod.balanced49.arff_grid_search/SMvsOther-metabolite-binary_numeric_categorical.mod.balanced49.arff--ran_for--par1.pred  yes no
+
+  for multiple files use: 
+  
+  	python command_files5.py
+  	qsub command_files_fmeasure.sh
 
   OR use a unix loop: 
   
         for i in *arff_grid_search/*.pred; do echo $i; python /mnt/home/john3784/Github/MachineLearning-Weka/performance_at_thresholds-pred2.py $i yes no; done
 
 9. top performing f measure
-  3-get_top_performing_FM_final.py <dir with results folders with .thresh_perf files>
+
+  		3-get_top_performing_FM_final.py <dir with results folders with .thresh_perf files>
   	
-	python ~john3784/Github/MachineLearning-Weka/3_get_top_performing_FM_final.py /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/SMvsOther_arff_files/
+		python ~john3784/Github/MachineLearning-Weka/3_get_top_performing_FM_final.py /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/SMvsOther_arff_files/
 
 10. Get SVM weights for each feature
-  python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/get_full_output-top_file.py <.top file> <.runcc file>
-  python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/get_full_output-top_file.py metabolite-aucroc2.top metabolite_all4.runcc
-  less metabolites-2ndmetabolites-binary_numeric-mod2.arff--smo_oup6.full_output
+
+  		python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/get_full_output-top_file.py <.top file> <.runcc file>
+  		python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/get_full_output-top_file.py metabolite-aucroc2.top metabolite_all4.runcc
+		
+  output: 
+  
+  		metabolites-2ndmetabolites-binary_numeric-mod2.arff--smo_oup6.full_output
 
   parse .fulloutput file to get weights:
-  python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/weights_from_SMO.py <.full_output SMO file>
-  python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/weights_from_SMO.py metabolites-2ndmetabolites-binary_numeric-mod2.arff--smo_oup6.full_output
-  less metabolites-2ndmetabolites-binary_numeric-mod2.arff--smo_oup6.full_output.weights
+  
+  	python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/weights_from_SMO.py <.full_output SMO file>
+ 	 python ~lloydjo1/scripts/2_Machine_Learning/3_Performance/weights_from_SMO.py metabolites-2ndmetabolites-binary_numeric-mod2.arff--smo_oup6.full_output
+	 
+  output:
+  
+  	metabolites-2ndmetabolites-binary_numeric-mod2.arff--smo_oup6.full_output.weights
 
   *For looking at feature importance to see under or over representation, and if you should flip the signs on weights
   Turn the matrix into separate files for each column with this script:
@@ -193,6 +201,7 @@ This option will output a runcc file containing commands to generate models from
   python ~lloydjo1/Projects/0_side_projects/1_metabolism_gene_predictions/_scripts/matrix2mld.py lethal8_binary-w_greencut.matrix
   python ~lloydjo1/Projects/0_side_projects/1_metabolism_gene_predictions/_scripts/matrix2mld.py lethal8_continuous.matrix.c_norm
   Using the script below, create a file for each feature with three rows: row 1 includes the values for a feature for secondary metabolite genes, row 2 has the values for primary metabolite genes, and row 3 has the values for all other genes
+  
   python ~lloydjo1/scripts/pull_out_data_on_files.py <feature file> <output name> y <1-column file with secondary metabolite gene IDs> <1-column file with primary metabolite gene IDs>
   This step can be run with a unix loop: for i in *[suffix]; do echo $i; python ~lloydjo1/scripts/pull_out_data_on_files.py $i $i.grouped y <1-column file with secondary metabolity gene IDs> <1-column file with primary metabolite gene IDs>; done
 
