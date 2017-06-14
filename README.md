@@ -230,7 +230,7 @@ This option will output a runcc file containing commands to generate models from
 13. Visualize features via Barplot:
   use barplot_features.R with an input of a list of features and their weights (pos or neg)
 
-#applying models to unknown data:
+#applying models to known cv data and get scores:
 
 1. first get run the manually cross validated files (all_cv.runcc) to get scores for your training set:
 
@@ -239,12 +239,39 @@ This option will output a runcc file containing commands to generate models from
 	Calculate the fmeasure for each run, and find the highest fmeasure.
 	Use the score associated with this f-measure as your cutoff for classifying
 
-2. Next you need the best_models.runcc file generated in step 7 (assessing grid search performance)
+2. apply models to cross validated samples 
+
+		python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_3-apply_manual_cv_models-balanced_arffs.py
+		
+arguments:
+
+	inp1 = directory with [arff]_grid_search subdirectories
+
+This script will generate a runcc file for applying the manual models of the best parameter
+sets for each classifier: output runcc file: main_dir/all_apply_models.runcc
+
+3. associate scores with cross-validated samples #this step requires scikit
+
+		python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_4-associate_gene_ids-balanced_arffs.py
+	
+arguments:
+
+	inp1 = directory with [arff]_grid_search subdirectories
+	inp2 = file with instance IDs from the original, unbalanced ARFF file
+
+This script will associate yes probability scores with gene IDs for each
+balanced, manually CV split file. It will also combine all scores across
+files for each ML classifer into one output file.
+
+  output score files: input_dir/model--[classifier]--[parameters].scores
+
+#use best model to apply to unknown data
+
+1. First you need the best_models.runcc file generated in step 7 (assessing grid search performance)
 	
 	qsub this file:
 	
 		python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c best_models.runcc -w 239 -m 12 		   -n 230
-
 3. use the following script to generate another runcc file to apply best-performing models to an unlabled ARFF file:
 	
 		/mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_3b-apply_models_to_unlabeled-balanced_arff.py
@@ -267,11 +294,12 @@ This script will output a runcc files containing commands to apply best-performi
 
 	Once models have completed being applied to test sets, this script will assocaited teh machine learning scores with instance identifiers:
 	
-	/mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_4-associate_gene_ids-balanced_arffs.py 
+		python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_4-associate_gene_ids-balanced_arffs.py 
 	
 	arguments:
-	inp1 = directory with model_applied.arff prediction files
-	inp2 = file with instance IDs from the unlabeled ARFF file
+	
+		inp1 = directory with model_applied.arff prediction files
+		inp2 = file with instance IDs from the unlabeled ARFF file
 
 	This script will associate yes probability scores with gene IDs for each
 	balanced model. It will also combine all scores across files for each ML classifer into one output file.
