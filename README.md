@@ -264,6 +264,10 @@ balanced, manually CV split file. It will also combine all scores across
 files for each ML classifer into one output file.
 
   output score files: input_dir/model--[classifier]--[parameters].scores
+  
+get F-measure cut off to call threshold on score file
+
+	python ~john3784/Github/MachineLearning-Weka/get_threshold_cutoff.py model--smo--par0.1.all_scores
 
 #use best model to apply to unknown data
 
@@ -272,7 +276,7 @@ files for each ML classifer into one output file.
 	qsub this file:
 	
 		python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c best_models.runcc -w 239 -m 12 		   -n 230
-3. use the following script to generate another runcc file to apply best-performing models to an unlabled ARFF file:
+2. use the following script to generate another runcc file to apply best-performing models to an unlabled ARFF file:
 	
 		/mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_3b-apply_models_to_unlabeled-balanced_arff.py
 	
@@ -290,7 +294,7 @@ This script will output a runcc files containing commands to apply best-performi
 
 		python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c apply_models-unlabeled.runcc -w 239 -m 12 -n 230
 
-4. Associate scores with instance identifiers - unlabeled instances
+5. Associate scores with instance identifiers - unlabeled instances
 
 	Once models have completed being applied to test sets, this script will assocaited teh machine learning scores with instance identifiers:
 	
@@ -305,6 +309,8 @@ This script will output a runcc files containing commands to apply best-performi
 	balanced model. It will also combine all scores across files for each ML classifer into one output file.
 
   	output score files: input_dir/model--[classifier]--[parameters].scores
+
+
 
 #A note on Support Vector Machines and feature selection:
 
