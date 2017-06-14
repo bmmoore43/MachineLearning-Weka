@@ -195,40 +195,40 @@ This option will output a runcc file containing commands to generate models from
   
   	metabolites-2ndmetabolites-binary_numeric-mod2.arff--smo_oup6.full_output.weights
 
-  *For looking at feature importance to see under or over representation, and if you should flip the signs on weights
-  Turn the matrix into separate files for each column with this script:
-  python ~lloydjo1/Projects/0_side_projects/1_metabolism_gene_predictions/_scripts/matrix2mld.py <matrix file>
-  python ~lloydjo1/Projects/0_side_projects/1_metabolism_gene_predictions/_scripts/matrix2mld.py lethal8_binary-w_greencut.matrix
-  python ~lloydjo1/Projects/0_side_projects/1_metabolism_gene_predictions/_scripts/matrix2mld.py lethal8_continuous.matrix.c_norm
-  Using the script below, create a file for each feature with three rows: row 1 includes the values for a feature for secondary metabolite genes, row 2 has the values for primary metabolite genes, and row 3 has the values for all other genes
+11.Look at feature importance to see under or over representation, and if you should flip the signs on weights
   
-  python ~lloydjo1/scripts/pull_out_data_on_files.py <feature file> <output name> y <1-column file with secondary metabolite gene IDs> <1-column file with primary metabolite gene IDs>
-  This step can be run with a unix loop: for i in *[suffix]; do echo $i; python ~lloydjo1/scripts/pull_out_data_on_files.py $i $i.grouped y <1-column file with secondary metabolity gene IDs> <1-column file with primary metabolite gene IDs>; done
+  Turn the matrix into separate files for each column with this script:
+  
+  	python ~lloydjo1/Projects/0_side_projects/1_metabolism_gene_predictions/_scripts/matrix2mld.py <matrix file>
+  	
+Using the script below, create a file for each feature with three rows: row 1 includes the values for a feature for secondary metabolite genes, row 2 has the values for primary metabolite genes, and row 3 has the values for all other genes
+  
+  	python ~lloydjo1/scripts/pull_out_data_on_files.py <feature file> <output name> y <1-column file with secondary metabolite gene IDs> <1-column file with primary metabolite gene IDs>
 
-  for i in *[.MLD]; do echo $i; python ~lloydjo1/scripts/pull_out_data_on_files.py $i $i.grouped y secondary_metabolites.txt primary_metabolites.txt; done
+This step can be run with a unix loop: 
 
-  Move the resulting binary and numeric value files (these will be suffixed ".grouped") into separate binary and numeric directories
-  Load the SciPy module before doing the enrichment testing below
+	for i in *[suffix]; do echo $i; python ~lloydjo1/scripts/pull_out_data_on_files.py $i $i.grouped y <1-column file with secondary metabolity gene IDs> <1-column file with primary metabolite gene IDs>; done
+
+Move the resulting binary and numeric value files (these will be suffixed ".grouped") into separate binary and numeric directories
+Load the SciPy module before doing the enrichment testing below
 
   In the numeric directory, run one of these scripts to either K-S or MWU test each of the grouped files:
 
-  python ~lloydjo1/scripts/_Batch/mwu_test-batch.py <numeric directory> <output file name> 0 1
-  python ~lloydjo1/scripts/_Batch/mwu_test-batch.py /mnt/home/john3784/Documents/machine_learning/numeric_files/ numeric_feature_importance 0 1
-  grep "Rest" -v numeric_feature_importance.mwu_test
+  	python ~lloydjo1/scripts/_Batch/mwu_test-batch.py <numeric directory> <output file name> 0 1
+
 -or-
 
-  python ~lloydjo1/scripts/_Batch/ks_test-batch.py <numeric directory> <output file name> 0 1
-  python ~lloydjo1/scripts/_Batch/ks_test-batch.py /mnt/home/john3784/Documents/machine_learning/numeric_files/ numeric_feature_importance 0 1
-  grep "Rest" -v numeric_feature_importance.ks_test
+  	python ~lloydjo1/scripts/_Batch/ks_test-batch.py <numeric directory> <output file name> 0 1
+  	grep "Rest" -v numeric_feature_importance.ks_test
 
   In the binary directory, run this script to Fisher's Exact Test each of the grouped files:
 
-  python ~lloydjo1/scripts/_Batch/fisher_exact-batch.py <binary directory> 0 1 <output name> 0 1
-  python ~lloydjo1/scripts/_Batch/fisher_exact-batch.py /mnt/home/john3784/Documents/machine_learning/binary_files/ 1 0 binary_features_importance 0 1
-  grep "Rest" -v binary_features_importance.fisher_test
+  	python ~lloydjo1/scripts/_Batch/fisher_exact-batch.py <binary directory> 0 1 <output name> 0 1
+  	grep "Rest" -v binary_features_importance.fisher_test
 
-13. Visualize features via Barplot:
-  use barplot_features.R with an input of a list of features and their weights (pos or neg)
+12. Visualize features via Barplot:
+  
+  		barplot_features.R with an input of a list of features and their weights (pos or neg)
 
 #applying models to known cv data and get scores:
 
@@ -265,9 +265,9 @@ files for each ML classifer into one output file.
 
   output score files: input_dir/model--[classifier]--[parameters].scores
   
-get F-measure cut off to call threshold on score file
+4. get F-measure cut off to call threshold on score file
 
-	python ~john3784/Github/MachineLearning-Weka/get_threshold_cutoff.py model--smo--par0.1.all_scores
+		python ~john3784/Github/MachineLearning-Weka/get_threshold_cutoff.py model--smo--par0.1.all_scores
 
 #use best model to apply to unknown data
 
@@ -275,7 +275,7 @@ get F-measure cut off to call threshold on score file
 	
 	qsub this file:
 	
-		python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c best_models.runcc -w 239 -m 12 		   -n 230
+		python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c best_models.runcc -w 239 -m 12 -n 230
 2. use the following script to generate another runcc file to apply best-performing models to an unlabled ARFF file:
 	
 		/mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_3b-apply_models_to_unlabeled-balanced_arff.py
@@ -290,15 +290,15 @@ This script will output a runcc files containing commands to apply best-performi
 
 		python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_3b-apply_models_to_unlabeled-balanced_arff.py /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/SMvsPM_nogluc_arff_files/ SMvsPM_nogluc-metabolite-binary_numeric_categorical.mod.unlabeled.arff /mnt/home/john3784/2-specialized_metab_project/machine-learn_files/arff_files2.0/SMvsPM_nogluc_arff_files/results/
 
-4. qsub the apply_models-unlabeled.runcc
+3. qsub the apply_models-unlabeled.runcc
 
 		python /mnt/home/john3784/2-specialized_metab_project/qsub_hpc.py  -f submit -u john3784 -c apply_models-unlabeled.runcc -w 239 -m 12 -n 230
 
-5. Associate scores with instance identifiers - unlabeled instances
+4. Associate scores with instance identifiers - unlabeled instances
 
 	Once models have completed being applied to test sets, this script will assocaited teh machine learning scores with instance identifiers:
 	
-		python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_4-associate_gene_ids-balanced_arffs.py 
+		python /mnt/home/lloydjo1/scripts/2_Machine_Learning/machine_learning_pipeline_4b-associate_gene_ids-unlabeled-balanced_arffs.py  
 	
 	arguments:
 	
@@ -310,6 +310,9 @@ This script will output a runcc files containing commands to apply best-performi
 
   	output score files: input_dir/model--[classifier]--[parameters].scores
 
+5. get F-measure cut off to call threshold on score file
+
+		python ~john3784/Github/MachineLearning-Weka/get_threshold_cutoff.py model--smo--par0.1.all_scores
 
 
 #A note on Support Vector Machines and feature selection:
