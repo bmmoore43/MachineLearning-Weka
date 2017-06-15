@@ -265,9 +265,29 @@ files for each ML classifer into one output file.
 
   output score files: input_dir/model--[classifier]--[parameters].scores
   
-4. get F-measure cut off to call threshold on score file
+4. get F-measure cut off to call threshold on score file -this script does not do balanced data to calc fmeasure
 
 		python ~john3784/Github/MachineLearning-Weka/get_threshold_cutoff.py model--smo--par0.1.all_scores
+
+5. get F-measure for balanced data to call threshold
+
+	first get random pulls from your negative dataset (will output 100 random files for each model)
+	
+		python get_random_genes_scorefile.py <model .score file>
+		
+	output:
+	
+		scores.random_out.1..100 files
+		
+	now get threshold from random sampling of data:
+	
+		python performance_at_thresholds-pred2_randomfiles.py <start_dir with random files>
+
+	output:
+	
+		model_random_thresh_perf.txt
+		
+	use this file to draw threshold
 
 #use best model to apply to unknown data
 
