@@ -281,7 +281,7 @@ files for each ML classifer into one output file.
 		
 	now get threshold from random sampling of data:
 	
-		python performance_at_thresholds-pred2_randomfiles.py <start_dir with random files>
+		python performance_at_thresholds-pred2_randomfiles.py <start_dir with random files> <pos class name> <neg class name>
 
 	output:
 	
