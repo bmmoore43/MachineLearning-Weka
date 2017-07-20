@@ -264,6 +264,7 @@ balanced, manually CV split file. It will also combine all scores across
 files for each ML classifer into one output file.
 
   output score files: input_dir/model--[classifier]--[parameters].scores
+  Columns: Instance ID | class | median score | standard deviation of score | number of scores | all scores, comma-delimited
   
 4. get F-measure cut off to call threshold on score file -this script does not do balanced data to calc fmeasure
 
