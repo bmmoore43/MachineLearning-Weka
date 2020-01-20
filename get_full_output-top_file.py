@@ -16,7 +16,7 @@ except:
 def pull_smo_file_nm(top_fl):
 	inp = open(top_fl)
 	for line in inp:
-		if "--smo--par" in line:
+		if "--smo_oup" in line:
 			lineLst = line.split("\t")
 			scv = lineLst[0]
 			prd = scv.replace(".sorted_cv","")
